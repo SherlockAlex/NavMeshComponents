@@ -9,7 +9,6 @@ namespace UnityEditor.AI
 {
     public class NavMeshAssetManager : ScriptableSingleton<NavMeshAssetManager>
     {
-        //internal 同一程序集，同一成员才可访问
         internal struct AsyncBakeOperation
         {
             public NavMeshSurface surface;

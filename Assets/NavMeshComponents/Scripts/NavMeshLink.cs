@@ -141,11 +141,18 @@ namespace UnityEngine.AI
 
         static void UpdateTrackedInstances()
         {
-            foreach (var instance in s_Tracked)
+            //foreach (var instance in s_Tracked)
+            for(int i=0;i<s_Tracked.Count;i++)
             {
-                if (instance.HasTransformChanged())
-                    instance.UpdateLink();
+                if (s_Tracked[i].HasTransformChanged())
+                    s_Tracked[i].UpdateLink();
             }
+
+            //foreach (var instance in s_Tracked)
+            //{
+            //    if (instance.HasTransformChanged())
+            //        instance.UpdateLink();
+            //}
         }
 
 #if UNITY_EDITOR

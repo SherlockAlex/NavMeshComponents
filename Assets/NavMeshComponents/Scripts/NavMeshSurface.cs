@@ -285,59 +285,111 @@ namespace UnityEngine.AI
                 modifiers = NavMeshModifier.activeModifiers;
             }
 
-            foreach (var m in modifiers)
+            //foreach (var m in modifiers)
+
+            for(int i=0;i<modifiers.Count;i++)
             {
-                if ((m_LayerMask & (1 << m.gameObject.layer)) == 0)
+                if ((m_LayerMask & (1 << modifiers[i].gameObject.layer)) == 0)
                     continue;
-                if (!m.AffectsAgentType(m_AgentTypeID))
+                if (!modifiers[i].AffectsAgentType(m_AgentTypeID))
                     continue;
                 var markup = new NavMeshBuildMarkup();
-                markup.root = m.transform;
-                markup.overrideArea = m.overrideArea;
-                markup.area = m.area;
-                markup.ignoreFromBuild = m.ignoreFromBuild;
+                markup.root = modifiers[i].transform;
+                markup.overrideArea = modifiers[i].overrideArea;
+                markup.area = modifiers[i].area;
+                markup.ignoreFromBuild = modifiers[i].ignoreFromBuild;
                 markups.Add(markup);
             }
+
+            //foreach (var m in modifiers)
+            //{
+            //    if ((m_LayerMask & (1 << m.gameObject.layer)) == 0)
+            //        continue;
+            //    if (!m.AffectsAgentType(m_AgentTypeID))
+            //        continue;
+            //    var markup = new NavMeshBuildMarkup();
+            //    markup.root = m.transform;
+            //    markup.overrideArea = m.overrideArea;
+            //    markup.area = m.area;
+            //    markup.ignoreFromBuild = m.ignoreFromBuild;
+            //    markups.Add(markup);
+            //}
 
 #if UNITY_EDITOR
             if (!EditorApplication.isPlaying)
             {
-                if (m_CollectObjects == CollectObjects.All)
-                {
-                    UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
-                        null, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
-                }
-                else if (m_CollectObjects == CollectObjects.Children)
-                {
-                    UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
-                        transform, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
-                }
-                else if (m_CollectObjects == CollectObjects.Volume)
-                {
-                    Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
-                    var worldBounds = GetWorldBounds(localToWorld, new Bounds(m_Center, m_Size));
 
-                    UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
-                        worldBounds, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
+
+                switch (m_CollectObjects)
+                {
+                    case CollectObjects.All:
+                        UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
+                            null, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
+                        break;
+                    case CollectObjects.Children:
+                        UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
+                            transform, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
+                        break;
+                    case CollectObjects.Volume:
+                        Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+                        var worldBounds = GetWorldBounds(localToWorld, new Bounds(m_Center, m_Size));
+                        UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
+                            worldBounds, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
+                        break;
                 }
+
+                //if (m_CollectObjects == CollectObjects.All)
+                //{
+                //    UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
+                //        null, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
+                //}
+                //else if (m_CollectObjects == CollectObjects.Children)
+                //{
+                //    UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
+                //        transform, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
+                //}
+                //else if (m_CollectObjects == CollectObjects.Volume)
+                //{
+                //    Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+                //    var worldBounds = GetWorldBounds(localToWorld, new Bounds(m_Center, m_Size));
+
+                //    UnityEditor.AI.NavMeshBuilder.CollectSourcesInStage(
+                //        worldBounds, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, gameObject.scene, sources);
+                //}
             }
             else
 #endif
             {
-                if (m_CollectObjects == CollectObjects.All)
+
+                switch (m_CollectObjects)
                 {
-                    NavMeshBuilder.CollectSources(null, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
+                    case CollectObjects.All:
+                        NavMeshBuilder.CollectSources(null, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
+                        break;
+                    case CollectObjects.Children:
+                        NavMeshBuilder.CollectSources(transform, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
+                        break;
+                    case CollectObjects.Volume:
+                        Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+                        var worldBounds = GetWorldBounds(localToWorld, new Bounds(m_Center, m_Size));
+                        NavMeshBuilder.CollectSources(worldBounds, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
+                        break;
                 }
-                else if (m_CollectObjects == CollectObjects.Children)
-                {
-                    NavMeshBuilder.CollectSources(transform, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
-                }
-                else if (m_CollectObjects == CollectObjects.Volume)
-                {
-                    Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
-                    var worldBounds = GetWorldBounds(localToWorld, new Bounds(m_Center, m_Size));
-                    NavMeshBuilder.CollectSources(worldBounds, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
-                }
+
+                //if (m_CollectObjects == CollectObjects.All)
+                //{
+                //    NavMeshBuilder.CollectSources(null, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
+                //}
+                //else if (m_CollectObjects == CollectObjects.Children)
+                //{
+                //    NavMeshBuilder.CollectSources(transform, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
+                //}
+                //else if (m_CollectObjects == CollectObjects.Volume)
+                //{
+                //    Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+                //    var worldBounds = GetWorldBounds(localToWorld, new Bounds(m_Center, m_Size));
+                //    NavMeshBuilder.CollectSources(worldBounds, m_LayerMask, m_UseGeometry, m_DefaultArea, markups, sources);
+                //}
             }
 
             if (m_IgnoreNavMeshAgent)
@@ -373,23 +425,26 @@ namespace UnityEngine.AI
             worldToLocal = worldToLocal.inverse;
 
             var result = new Bounds();
-            foreach (var src in sources)
+
+            //foreach (var src in sources)
+            for(int i=0;i<sources.Count;i++)
             {
+                NavMeshBuildSource src = sources[i];
                 switch (src.shape)
                 {
                     case NavMeshBuildSourceShape.Mesh:
-                    {
-                        var m = src.sourceObject as Mesh;
-                        result.Encapsulate(GetWorldBounds(worldToLocal * src.transform, m.bounds));
-                        break;
-                    }
+                        {
+                            var m = src.sourceObject as Mesh;
+                            result.Encapsulate(GetWorldBounds(worldToLocal * src.transform, m.bounds));
+                            break;
+                        }
                     case NavMeshBuildSourceShape.Terrain:
-                    {
-                        // Terrain pivot is lower/left corner - shift bounds accordingly
-                        var t = src.sourceObject as TerrainData;
-                        result.Encapsulate(GetWorldBounds(worldToLocal * src.transform, new Bounds(0.5f * t.size, t.size)));
-                        break;
-                    }
+                        {
+                            // Terrain pivot is lower/left corner - shift bounds accordingly
+                            var t = src.sourceObject as TerrainData;
+                            result.Encapsulate(GetWorldBounds(worldToLocal * src.transform, new Bounds(0.5f * t.size, t.size)));
+                            break;
+                        }
                     case NavMeshBuildSourceShape.Box:
                     case NavMeshBuildSourceShape.Sphere:
                     case NavMeshBuildSourceShape.Capsule:
@@ -398,6 +453,32 @@ namespace UnityEngine.AI
                         break;
                 }
             }
+
+            //foreach (var src in sources)
+            //{
+            //    switch (src.shape)
+            //    {
+            //        case NavMeshBuildSourceShape.Mesh:
+            //        {
+            //            var m = src.sourceObject as Mesh;
+            //            result.Encapsulate(GetWorldBounds(worldToLocal * src.transform, m.bounds));
+            //            break;
+            //        }
+            //        case NavMeshBuildSourceShape.Terrain:
+            //        {
+            //            // Terrain pivot is lower/left corner - shift bounds accordingly
+            //            var t = src.sourceObject as TerrainData;
+            //            result.Encapsulate(GetWorldBounds(worldToLocal * src.transform, new Bounds(0.5f * t.size, t.size)));
+            //            break;
+            //        }
+            //        case NavMeshBuildSourceShape.Box:
+            //        case NavMeshBuildSourceShape.Sphere:
+            //        case NavMeshBuildSourceShape.Capsule:
+            //        case NavMeshBuildSourceShape.ModifierBox:
+            //            result.Encapsulate(GetWorldBounds(worldToLocal * src.transform, new Bounds(Vector3.zero, src.size)));
+            //            break;
+            //    }
+            //}
             // Inflate the bounds a bit to avoid clipping co-planar sources
             result.Expand(0.1f);
             return result;
